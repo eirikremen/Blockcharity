@@ -57,7 +57,8 @@ contract('master_swap', ([deployer, investor ]) => {
 			assert.equal(MasterSwapBalance.toString(), tokens("999900"))
 			MasterSwapBalance = await web3.eth.getBalance(masterSwapContract.address)
 			assert.equal(MasterSwapBalance.toString(), web3.utils.toWei("1", "ether"))
-		
+			
+			//Check logs to ensure event was emitted with correct data
 			const event = result.logs[0].args
 			assert.equal(event.account, investor)
 			assert.equal(event.token, tokenContract.address)
@@ -88,8 +89,19 @@ contract('master_swap', ([deployer, investor ]) => {
 			assert.equal(MasterSwapBalance.toString(), tokens("1000000"))
 			MasterSwapBalance = await web3.eth.getBalance(masterSwapContract.address)
 			assert.equal(MasterSwapBalance.toString(), web3.utils.toWei("0", "ether"))
+		
+			//Check logs to ensure event was emitted with correct data
+			const event = result.logs[0].args
+			assert.equal(event.account, investor)
+			assert.equal(event.token, tokenContract.address)
+			assert.equal(event.amount.toString(),tokens("100").toString())
+			assert.equal(event.rate.toString(), "100")
+
+			//Failure: investor can´t sell more tokens than they have
+			await masterSwapContract.sellTokens(tokens("500"), { from: investor}).should.be.rejected;
 		})
 	})
+
 
 })
 
